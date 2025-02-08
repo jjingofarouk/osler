@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>AskOsler - Your AI Medical Assistant</title>
+  <meta content="AskOsler is an AI-powered platform providing medical students and doctors with accurate, evidence-based medical knowledge in real time." name="description">
+  <meta content="AskOsler, AI medical assistant, medical education, healthcare AI, medical information, clinical knowledge" name="keywords">
+
+  <!-- Favicons -->
+  <link href="{{url_for('static', filename='assets/img/bothead.png')}}" rel="icon">
+  <link href="{{url_for('static', filename='assets/img/bothead.png')}}" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{{url_for('static', filename='assets/vendor/aos/aos.css')}}" rel="stylesheet">
+  <link href="{{url_for('static', filename='assets/vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+  <link href="{{url_for('static', filename='assets/vendor/bootstrap-icons/bootstrap-icons.css')}}" rel="stylesheet">
+  <link href="{{url_for('static', filename='assets/vendor/boxicons/css/boxicons.min.css')}}" rel="stylesheet">
+  <link href="{{url_for('static', filename='assets/vendor/glightbox/css/glightbox.min.css')}}" rel="stylesheet">
+  <link href="{{url_for('static', filename='assets/vendor/remixicon/remixicon.css')}}" rel="stylesheet">
+  <link href="{{url_for('static', filename='assets/vendor/swiper/swiper-bundle.min.css')}}" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="{{url_for('static', filename='assets/css/style.css')}}" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <style>
+    body {
+      background: linear-gradient(135deg, #8A2BE2, #9400D3) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="fixed-top">
+    <div class="container d-flex align-items-center">
+      <h1 class="logo me-auto"><a href="/">AskOsler</a></h1>
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a class="nav-link scrollto active" href="#why-us">About</a></li>
+          <li><a class="getstarted scrollto" href="/chat">Start Chatting</a></li>
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ======= Hero Section ======= -->
+  <section id="hero" class="d-flex align-items-center">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 d-flex flex-column justify-content-center pt-4 pt-lg-0 order-2 order-lg-1" data-aos="fade-up" data-aos-delay="200">
+          <h1>Your AI-Powered Medical Assistant</h1>
+          <p>AskOsler provides **instant, accurate, and evidence-based medical knowledge** to support medical students and healthcare professionals.</p>
+          <div class="d-flex justify-content-center justify-content-lg-start">
+            <a href="/chat" class="btn-get-started scrollto">Start Chatting</a>
+          </div>
+        </div>
+        <div class="col-lg-6 order-1 order-lg-2 hero-img" data-aos="zoom-in" data-aos-delay="200">
+          <img src="{{url_for('static', filename='assets/img/movingbot.gif')}}" class="img-fluid animated" alt="">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main id="main">
+
+    <!-- ======= About Section ======= -->
+    <section id="why-us" class="why-us section-bg">
+      <div class="container-fluid" data-aos="fade-up">
+        <div class="section-title">
+          <h2>About AskOsler</h2>
+        </div>
+        <div class="row">
+          <div class="col-lg-7 d-flex flex-column justify-content-center align-items-stretch order-2 order-lg-1">
+            <div class="content">
+              <h3>What is AskOsler?</h3>
+              <p>
+                AskOsler is an **AI-powered medical knowledge assistant** designed for **medical students and doctors**.  
+                It provides **accurate, real-time medical information** based on the latest research, textbooks, and clinical guidelines.
+              </p>
+
+              <h4>Why "Osler"?</h4>
+              <p>
+                AskOsler is inspired by **Sir William Osler**, the legendary physician who transformed medical education.  
+                Osler believed in **bedside learning, clinical reasoning, and lifelong education**—values that AskOsler upholds.
+              </p>
+
+              <h4>How You Can Use AskOsler</h4>
+              <ul>
+                <li>📚 **Medical Students** – Get clear explanations, case studies, and help with exam preparation.</li>
+                <li>🩺 **Doctors & Clinicians** – Access quick, evidence-based answers for patient care and clinical decisions.</li>
+                <li>🔬 **Researchers** – Stay updated with the latest medical guidelines, journals, and clinical protocols.</li>
+              </ul>
+
+              <h4>Why AskOsler?</h4>
+              <ul>
+                <li>✅ **Reliable & Evidence-Based** – Uses the latest research and medical guidelines.</li>
+                <li>✅ **Fast & Accessible** – Available 24/7, anytime you need medical insights.</li>
+                <li>✅ **Designed for Learning & Clinical Practice** – Supports both students and doctors in real-life applications.</li>
+              </ul>
+
+              <p>
+                **Join thousands of medical professionals using AskOsler to enhance their knowledge and improve patient care.**  
+                **Start exploring now!**
+              </p>
+            </div>
+          </div>
+          <div class="col-lg-5 align-items-stretch order-1 order-lg-2 img" style="background-image: url('../static/assets/img/manbot.png');" data-aos="zoom-in" data-aos-delay="150">&nbsp;</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer">
+    <div class="container footer-bottom clearfix">
+      <div class="copyright">
+        &copy; Copyright <strong><span>AskOsler</span></strong>. All Rights Reserved
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

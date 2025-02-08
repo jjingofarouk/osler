@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Professor Osler Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-light: #dbeafe;
+            --secondary-color: #64748b;
+            --background-color: #f8fafc;
+            --surface-color: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: var(--surface-color);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+        }
+
+        .chat-header {
+            background: var(--surface-color);
+            color: var(--text-primary);
+            padding: 1.25rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .chat-header img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .chat-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .message.visible {
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .message .message-content {
+            max-width: 85%;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            word-wrap: break-word;
+            white-space: pre-wrap;  /* Preserve line breaks and formatting */
+        }
+
+        .bot-message {
+            background: var(--primary-light);
+            color: var(--text-primary);
+            border-top-left-radius: 4px;
+        }
+
+        .user-message {
+            background: var(--primary-color);
+            color: white;
+            border-top-right-radius: 4px;
+        }
+
+        .user-message-container {
+            justify-content: flex-end;
+        }
+
+        .typing-indicator {
+            display: inline-block;
+            margin-left: 4px;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            background-color: var(--text-secondary);
+            border-radius: 50%;
+            margin: 0 1px;
+            animation: blink 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .chat-input {
+            display: flex;
+            border-top: 1px solid #e2e8f0;
+            padding: 1.25rem;
+            background: var(--surface-color);
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .chat-input input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .chat-input button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .chat-input button:hover {
+            background: #1d4ed8;
+        }
+
+        .chat-input button:disabled {
+            background: var(--secondary-color);
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 640px) {
+            .chat-container {
+                margin: 0;
+                border-radius: 0;
+                height: 100vh;
+            }
+
+            .message .message-content {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <img src="{{url_for('static', filename='assets/img/bothead.png')}}" alt="Professor Osler">
+            Professor Osler
+        </div>
+        <div class="chat-body" id="chat-history">
+            <div class="message visible">
+                <img src="{{url_for('static', filename='assets/img/bothead.png')}}" class="avatar" alt="Professor Osler">
+                <div class="message-content bot-message">
+                    <p><strong>Hello! I'm Professor Osler.</strong></p>
+                    <p>You can ask me any medical questions, and I'll be happy to help you learn.</p>
+                </div>
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="question" placeholder="Ask me something..." required>
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const chatHistory = $("#chat-history");
+            const questionInput = $("#question");
+            const sendButton = $("#send-button");
+            let isProcessing = false;
+
+            function scrollToBottom() {
+                const chatBody = chatHistory[0];
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+
+            function disableInput() {
+                questionInput.prop('disabled', true);
+                sendButton.prop('disabled', true);
+                isProcessing = true;
+            }
+
+            function enableInput() {
+                questionInput.prop('disabled', false);
+                sendButton.prop('disabled', false);
+                isProcessing = false;
+                questionInput.focus();
+            }
+
+            function appendUserMessage(message) {
+                const userMessageHtml = `
+                    <div class="message user-message-container">
+                        <div class="message-content user-message">${message}</div>
+                    </div>
+                `;
+                chatHistory.append(userMessageHtml);
+                setTimeout(() => {
+                    chatHistory.find('.message:last-child').addClass('visible');
+                }, 100);
+            }
+
+            function createBotMessageContainer() {
+                const botMessageHtml = `
+                    <div class="message">
+                        <img src="{{url_for('static', filename='assets/img/bothead.png')}}" class="avatar" alt="Professor Osler">
+                        <div class="message-content bot-message">
+                            <span class="typing-indicator">
+                                <span></span><span></span><span></span>
+                            </span>
+                        </div>
+                    </div>
+                `;
+                chatHistory.append(botMessageHtml);
+                setTimeout(() => {
+                    chatHistory.find('.message:last-child').addClass('visible');
+                }, 100);
+                return chatHistory.find('.message:last-child .message-content');
+            }
+
+            async function processStream(response) {
+                const reader = response.body.getReader();
+                const messageContainer = createBotMessageContainer();
+                let messageText = '';
+                let isScrolledToBottom = chatHistory[0].scrollHeight - chatHistory[0].scrollTop === chatHistory[0].clientHeight;
+
+                try {
+                    while (true) {
+                        const {value, done} = await reader.read();
+                        if (done) break;
+                        
+                        const chunk = new TextDecoder().decode(value);
+                        messageText += chunk;
+                        
+                        // Remove typing indicator and update text
+                        messageContainer.html(messageText);
+                        if (isScrolledToBottom) {
+                            scrollToBottom();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error reading stream:', error);
+                    messageContainer.html('An error occurred while processing your request.');
+                } finally {
+                    enableInput();
+                }
+            }
+
+            async function sendMessage() {
+                const userMessage = questionInput.val().trim();
+                if (userMessage === '' || isProcessing) return;
+
+                disableInput();
+                questionInput.val('');
+                appendUserMessage(userMessage);
+                scrollToBottom();
+
+                try {
+                    const response = await fetch('/send_chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ question: userMessage })
+                    });
+
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    await processStream(response);
+                } catch (error) {
+                    console.error('Error:', error);
+                    const messageContainer = createBotMessageContainer();
+                    messageContainer.html('An error occurred while processing your request.');
+                    enableInput();
+                }
+            }
+
+            sendButton.click(sendMessage);
+            questionInput.keypress(function(e) {
+                if (e.which == 13 && !isProcessing) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

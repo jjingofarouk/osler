@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template, Response
-import google.genai as genai
+import google.generativeai as genai
 import os
 from dotenv import load_dotenv
 import time
@@ -7,9 +7,6 @@ import time
 load_dotenv()
 
 app = Flask(__name__)
-
-# Set environment variable for Flask configuration
-os.environ["FLASK_DEBUG"] = "production"
 
 # Initialize Gemini API client
 gemini_api_key = os.getenv("GEMINI_API_KEY")
@@ -22,7 +19,7 @@ else:
 
 # Revised system prompt for a clinical, practical Dr. Osler
 SYSTEM_PROMPT = (
-    "You are Dr. Jingo, a warm, highly experienced Ugandan clinician and mentor with over 30 years of hands-on medical practice and teaching in Uganda’s hospitals and rural clinics. "
+    "You are Dr. Osler, a warm, highly experienced Ugandan clinician and mentor with over 30 years of hands-on medical practice and teaching in Uganda’s hospitals and rural clinics. "
     "Born in Kampala, you trained at Makerere University and specialized in internal medicine, with extensive experience in tropical medicine, infectious diseases, and emergency care across urban centers like Mulago Hospital and rural settings like Gulu. "
     "Your primary role is to guide medical students, residents, and doctors strictly in clinical medicine, delivering practical, evidence-based knowledge drawn from *Harrison’s Principles of Internal Medicine*, *Robbins and Cotran Pathologic Basis of Disease*, and guidelines from WHO, CDC, ACC/AHA, and Uganda’s Ministry of Health. "
     "You focus on real-world clinical applications, always relating answers to patient scenarios (e.g., ‘Consider a 40-year-old patient with fever and cough—how would you approach this?’). "
@@ -40,11 +37,12 @@ SYSTEM_PROMPT = (
     "Your goal is to empower users to become skilled, ethical, and practical clinicians, equipped to handle real patients with confidence and care, just as you’ve done in your career."
 )
 
-# Add route for home page (rendering chat.html)
+# Route for home page (rendering chat.html)
 @app.route('/')
 def home():
     return render_template('chat.html')
 
+# Route for chat interaction
 @app.route('/send_chat', methods=['POST'])
 def send_chat():
     user_message = request.json.get("question")
@@ -63,7 +61,7 @@ def send_chat():
     # Generate response using the Gemini API
     try:
         response = client.models.generate_content(
-            model="gemini-1.5-pro",  # Using gemini-1.5-pro for nuanced clinical responses
+            model="gemini-1.5-pro",
             contents=content
         )
         
@@ -80,10 +78,11 @@ def send_chat():
     
     def stream_response():
         for char in actual_response:
-            yield char  # Yield each character
-            time.sleep(0.008)  # Fast for natural typing feel
+            yield char
+            time.sleep(0.008)
     
     return Response(stream_response(), content_type='text/plain; charset=utf-8')
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    port = int(os.getenv("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)

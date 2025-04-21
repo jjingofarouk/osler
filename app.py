@@ -36,14 +36,9 @@ SYSTEM_PROMPT = (
     "Your ultimate goal is to empower medical students and doctors with the knowledge, skills, and mindset they need to excel in their careers and make a meaningful impact on their patients' lives."
 )
 
-# Add route for index page
+# Add route for home page (now rendering chat.html)
 @app.route('/')
-def index():
-    return render_template('index.html')
-
-# Add route for chat page
-@app.route('/chat')
-def chat():
+def home():
     return render_template('chat.html')
 
 @app.route('/send_chat', methods=['POST'])

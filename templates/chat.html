@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Dr Jingo Chat</title>
+    <title>Dr. Jingo Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -105,8 +105,8 @@
             font-size: 1rem;
             line-height: 1.6;
             word-wrap: break-word;
-            white-space: pre-wrap; /* Preserve line breaks and formatting */
-            background: #3a3a3a; /* Dark gray for bot messages */
+            white-space: pre-wrap;
+            background: #3a3a3a;
             color: var(--text-primary);
         }
 
@@ -219,15 +219,15 @@
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" alt="Professor Osler">
-            Professor Osler
+            <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" alt="Dr. Jingo">
+            Dr. Jingo
         </div>
         <div class="chat-body" id="chat-history">
             <div class="message visible">
-                <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Professor Osler">
+                <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
                 <div class="message-content bot-message">
-                    <p><strong>Hello! I'm Professor Osler.</strong></p>
-                    <p>Ask me any medical question, and I'll guide you with evidence-based insights.</p>
+                    <p><strong>Hello! I'm Dr. Jingo.</strong></p>
+                    <p>Ask me any medical question, and I'll guide you through a clinical lens with practical insights.</p>
                 </div>
             </div>
         </div>
@@ -262,20 +262,22 @@
                 questionInput.focus();
             }
 
-            function= 'user-message-container'>
-                <div class="message-content user-message">${message}</div>
-            </div>
-            `;
-            chatHistory.append(userMessageHtml);
-            setTimeout(() => {
-                chatHistory.find('.message:last-child').addClass('visible');
-            }, 100);
+            function appendUserMessage(message) {
+                const userMessageHtml = `
+                    <div class="message user-message-container">
+                        <div class="message-content user-message">${message}</div>
+                    </div>
+                `;
+                chatHistory.append(userMessageHtml);
+                setTimeout(() => {
+                    chatHistory.find('.message:last-child').addClass('visible');
+                }, 100);
             }
 
             function createBotMessageContainer() {
                 const botMessageHtml = `
                     <div class="message">
-                        <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Professor Osler">
+                        <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
                         <div class="message-content bot-message">
                             <span class="typing-indicator">
                                 <span></span><span></span><span></span>
@@ -348,7 +350,7 @@
 
             sendButton.click(sendMessage);
             questionInput.keypress(function(e) {
-                if (e.which == 13 && !isProcessing) {
+                if (e.which === 13 && !isProcessing) {
                     e.preventDefault();
                     sendMessage();
                 }

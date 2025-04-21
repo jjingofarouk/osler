@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template, Response
-import google.generativeai as genai
+import google.genai as genai
 import os
 from dotenv import load_dotenv
 import time
@@ -11,13 +11,14 @@ app = Flask(__name__)
 # Set environment variable for Flask configuration
 os.environ["FLASK_DEBUG"] = "production"
 
-# Initialize Gemini API
+# Initialize Gemini API client
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 if gemini_api_key:
     print("Gemini API Key loaded successfully.")
-    genai.configure(api_key=gemini_api_key)
+    client = genai.Client(api_key=gemini_api_key)
 else:
     print("Gemini API Key not found.")
+    client = None
 
 # System prompt to define the chatbot's personality
 SYSTEM_PROMPT = (
@@ -54,17 +55,18 @@ def send_chat():
     
     print(f"User: {user_message}")
     
-    # Define Gemini model
-    model = genai.GenerativeModel("gemini-pro")
+    if not client:
+        return jsonify({"error": "Gemini API client not initialized. Please check API key."}), 500
     
-    # Construct conversation with system prompt
-    conversation = [
-        {"role": "user", "parts": [{"text": SYSTEM_PROMPT + "\n\n" + user_message}]}
-    ]
+    # Construct the content with system prompt and user message
+    content = SYSTEM_PROMPT + "\n\n" + user_message
     
-    # Generate response with correct format
+    # Generate response using the new Gemini API
     try:
-        response = model.generate_content(conversation)
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",  # Updated model name (use the appropriate model, e.g., gemini-1.5-flash or gemini-1.5-pro)
+            contents=content
+        )
         
         if response and response.text:
             actual_response = response.text.strip()

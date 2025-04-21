@@ -8,16 +8,16 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Initialize Gemini API client
+# Initialize Gemini API
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 if gemini_api_key:
     print("Gemini API Key loaded successfully.")
-    client = genai.Client(api_key=gemini_api_key)
+    genai.configure(api_key=gemini_api_key)
 else:
     print("Gemini API Key not found.")
-    client = None
+    genai = None
 
-# Revised system prompt for a clinical, practical Dr. Osler
+# System prompt for Dr. Osler
 SYSTEM_PROMPT = (
     "You are Dr. Osler, a warm, highly experienced Ugandan clinician and mentor with over 30 years of hands-on medical practice and teaching in Uganda’s hospitals and rural clinics. "
     "Born in Kampala, you trained at Makerere University and specialized in internal medicine, with extensive experience in tropical medicine, infectious diseases, and emergency care across urban centers like Mulago Hospital and rural settings like Gulu. "
@@ -52,7 +52,7 @@ def send_chat():
     
     print(f"User: {user_message}")
     
-    if not client:
+    if not genai:
         return jsonify({"error": "I’m having trouble accessing my clinical notes. Please check the API key and try again."}), 500
     
     # Construct the content with system prompt and user message
@@ -60,10 +60,8 @@ def send_chat():
     
     # Generate response using the Gemini API
     try:
-        response = client.models.generate_content(
-            model="gemini-1.5-pro",
-            contents=content
-        )
+        model = genai.GenerativeModel('gemini-1.5-pro')
+        response = model.generate_content(content)
         
         if response and response.text:
             actual_response = response.text.strip()

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Dr. Osler Chat</title>
+    <title>Dr. Jjingo Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#006d77">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
@@ -379,19 +379,19 @@
 <body>
     <div class="app-container">
         <div class="logo-section">
-            <h1>Dr. Osler Medical Mentor</h1>
+            <h1>Dr. Jjingo Medical Mentor</h1>
             <p>Expert clinical guidance for medical students and healthcare professionals</p>
         </div>
         
         <div class="chat-container">
             <div class="chat-header">
-                <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" alt="Dr. Osler">
-                Dr. Osler
+                <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" alt="Dr. Jjingo">
+                Dr. Jjingo
             </div>
             
             <div class="chat-body" id="chat-history">
                 <div class="welcome-card">
-                    <h2>Welcome to Dr. Osler</h2>
+                    <h2>Welcome to Dr. Jjingo</h2>
                     <p>Your trusted AI medical mentor designed to support medical education and clinical reasoning.</p>
                     <div class="features">
                         <div class="feature">
@@ -410,9 +410,9 @@
                 </div>
                 
                 <div class="message visible">
-                    <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Osler">
+                    <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jjingo">
                     <div class="message-content bot-message">
-                        <p><strong>Hello! I'm Dr. Osler.</strong></p>
+                        <p><strong>Hello! I'm Dr. Jjingo.</strong></p>
                         <p>Ask me any medical question, and I'll guide you through a clinical lens with practical insights. I can help with clinical reasoning, differential diagnoses, and evidence-based approaches.</p>
                     </div>
                 </div>
@@ -470,7 +470,7 @@
             function createBotMessageContainer() {
                 const botMessageHtml = `
                     <div class="message">
-                        <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Osler">
+                        <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jjingo">
                         <div class="message-content bot-message">
                             <div class="typing-indicator">
                                 <span></span><span></span><span></span>

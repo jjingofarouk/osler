@@ -1,11 +1,11 @@
 {
-  "name": "Dr. Jingo Mentor",
+  "name": "Dr. Jingo",
   "short_name": "Jingo Mentor",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#faf3e0",
   "theme_color": "#006d77",
-  "description": "Expert clinical guidance for medical students and healthcare professionals",
+  "description": "Time to Know!",
   "orientation": "portrait-primary",
   "icons": [
     {

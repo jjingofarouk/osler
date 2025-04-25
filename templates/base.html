@@ -286,6 +286,7 @@
             align-items: center;
             justify-content: center;
             transition: background 0.2s ease;
+            flex-shrink: 0; /* Prevent button from shrinking */
         }
 
         .chat-input button:hover {
@@ -435,19 +436,21 @@
                 max-width: 90%;
             }
 
+            /* Fixed mobile layout for input container */
             .chat-input {
-                flex-direction: column;
+                display: flex;
+                flex-direction: row; /* Keep as row */
                 gap: 0.5rem;
             }
 
             .chat-input input {
-                width: 100%;
+                flex: 1;
             }
 
             .chat-input button {
-                width: 100%;
-                border-radius: 8px;
+                width: 40px; /* Smaller but still visible */
                 height: 40px;
+                border-radius: 50%; /* Keep it round */
             }
         }
     </style>

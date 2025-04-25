@@ -1,6 +1,6 @@
 # routes/case_study_routes.py
 from flask import Blueprint, render_template, jsonify, session, Response
-import google.generativeai as genai
+from routes.utils import genai, SYSTEM_PROMPT
 import logging
 
 logger = logging.getLogger(__name__)

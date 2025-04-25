@@ -1,38 +1,21 @@
-const CACHE_NAME = 'jingo-mentor-v1';
-const urlsToCache = [
-  '/',
-  '/static/css/bootstrap.min.css',
-  '/static/icons/icon-192.png',
-  '/static/icons/icon-512.png'
-];
-
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(urlsToCache);
-    })
-  );
-});
-
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
-  );
-});
-
-self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (!cacheWhitelist.includes(cacheName)) {
-            return caches.delete(cacheName);
-          }
+// static/service-worker.js
+self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open('dr-jingo-cache').then((cache) => {
+            return cache.addAll([
+                '/',
+                '/static/manifest.json',
+                '/static/icons/icon-192.png',
+                '/static/assets/img/bothead.png'
+            ]);
         })
-      );
-    })
-  );
+    );
+});
+
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        caches.match(event.request).then((response) => {
+            return response || fetch(event.request);
+        })
+    );
 });

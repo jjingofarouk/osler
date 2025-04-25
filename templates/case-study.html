@@ -1,565 +1,199 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Dr. Jingo Case Study</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#006d77">
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <link rel="icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    
-    <style>
-        :root {
-            --primary-color: #006d77;
-            --primary-light: #83c5be;
-            --secondary-color: #e9c46a;
-            --accent-color: #f4a261;
-            --background-color: #faf3e0;
-            --surface-color: #edf6f9;
-            --text-primary: #2a3439;
-            --text-secondary: #506770;
-            --border-color: #d2d6d7;
-            --user-message-bg: #006d77;
-            --user-text-color: #ffffff;
-            --bot-message-bg: #ffffff;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-        }
+<!-- templates/case_study.html -->
+{% extends "base.html" %}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+{% block title %}Case Study{% endblock %}
 
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            background-color: var(--background-color);
-            font-family: 'Poppins', sans-serif;
-            color: var(--text-primary);
-        }
-
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: var(--surface-color);
-            box-shadow: 0 0 20px var(--shadow-color);
-            position: relative;
-        }
-
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .chat-header {
-            background: var(--primary-color);
-            color: white;
-            padding: 0.85rem 1.25rem;
-            font-size: 1.25rem;
-            font-weight: 500;
-            border-bottom: 1px solid var(--primary-light);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex: 0 0 auto;
-            z-index: 10;
-        }
-
-        .chat-header img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 2px 5px var(--shadow-color);
-        }
-
-        .chat-body {
-            flex: 1 1 auto;
-            overflow-y: auto;
-            padding: 1.5rem;
-            background: var(--background-color);
-            background-image: linear-gradient(rgba(0, 109, 119, 0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 109, 119, 0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
-            position: relative;
-        }
-
-        .welcome-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 5px 15px var(--shadow-color);
-            border-left: 5px solid var(--primary-color);
-            max-width: 90%;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .welcome-card h2 {
-            color: var(--primary-color);
-            font-size: 1.4rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .welcome-card p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            justify-content: center;
-        }
-
-        .action-buttons button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .action-buttons button:hover {
-            background: var(--primary-light);
-        }
-
-        .message {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 1.25rem;
-            animation: fadeIn 0.3s ease-in-out;
-            opacity: 0;
-        }
-
-        .message.visible {
-            opacity: 1;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message .avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            margin-right: 0.85rem;
-            flex-shrink: 0;
-            box-shadow: 0 2px 5px var(--shadow-color);
-        }
-
-        .message .message-content {
-            max-width: 80%;
-            padding: 1rem 1.25rem;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-            box-shadow: 0 2px 5px var(--shadow-color);
-        }
-
-        .message .message-content p {
-            margin-bottom: 0.75rem;
-        }
-
-        .message .message-content p:last-child {
-            margin-bottom: 0;
-        }
-
-        .bot-message {
-            background: var(--bot-message-bg);
-            border-top-left-radius: 4px;
-            color: var(--text-primary);
-        }
-
-        .user-message-container {
-            justify-content: flex-end;
-            margin-right: 0.5rem;
-            display: flex;
-        }
-
-        .user-message {
-            background: var(--user-message-bg);
-            border-top-right-radius: 4px;
-            color: var(--user-text-color);
-        }
-
-        .typing-indicator {
-            display: inline-flex;
-            align-items: center;
-            height: 20px;
-        }
-
-        .typing-indicator span {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: var(--primary-light);
-            border-radius: 50%;
-            margin: 0 3px;
-            animation: blink 1.4s infinite;
-        }
-
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes blink {
-            0%, 100% { opacity: 0.4; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1); }
-        }
-
-        .input-container {
-            background: white;
-            border-top: 1px solid var(--border-color);
-            padding: 1rem 1.25rem;
-            position: sticky;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            flex: 0 0 auto;
-            z-index: 10;
-            width: 100%;
-            box-shadow: 0 -2px 10px var(--shadow-color);
-        }
-
-        .chat-input {
-            display: flex;
-            gap: 0.75rem;
-            align-items: center;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .chat-input input {
-            flex: 1;
-            padding: 0.85rem 1.25rem;
-            border: 2px solid var(--border-color);
-            border-radius: 30px;
-            font-size: 1rem;
-            background: var(--surface-color);
-            color: var(--text-primary);
-            outline: none;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 5px var(--shadow-color);
-        }
-
-        .chat-input input:focus {
-            border-color: var(--primary-light);
-            box-shadow: 0 2px 10px rgba(0, 109, 119, 0.15);
-        }
-
-        .chat-input input::placeholder {
-            color: var(--text-secondary);
-            opacity: 0.7;
-        }
-
-        .chat-input button {
-            width: 50px;
-            height: 50px;
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-weight: 500;
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(244, 162, 97, 0.4);
-        }
-
-        .chat-input button:hover {
-            background: #e76f51;
-            transform: translateY(-2px);
-        }
-
-        .chat-input button:active {
-            transform: translateY(0);
-        }
-
-        .chat-input button:disabled {
-            background: var(--border-color);
-            cursor: not-allowed;
-            opacity: 0.6;
-            box-shadow: none;
-        }
-
-        .nav-link {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            color: white;
-            font-size: 1rem;
-            text-decoration: none;
-        }
-
-        .nav-link:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .welcome-card {
-                padding: 1.25rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .chat-header {
-                padding: 0.75rem 1rem;
-            }
-
-            .message .message-content {
-                max-width: 85%;
-                padding: 0.75rem 1rem;
-                font-size: 0.9rem;
-            }
-
-            .input-container {
-                padding: 0.75rem 1rem;
-                padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0));
-            }
-        }
-
-        @supports (-webkit-touch-callout: none) {
-            .chat-body {
-                padding-bottom: 70px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="app-container">
-        <div class="chat-container">
-            <div class="chat-header">
-                <a href="{{ url_for('home') }}" class="nav-link"><i class="fas fa-arrow-left"></i> Back</a>
-                <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" alt="Dr. Jingo">
-                Dr. Jingo - Case Study
-            </div>
-            
-            <div class="chat-body" id="chat-history">
-                <div class="welcome-card">
-                    <h2>Case Study Mode</h2>
-                    <p>Practice clinical reasoning with interactive case studies tailored to Uganda's healthcare context.</p>
-                    <div class="action-buttons">
-                        <button id="start-case">Start New Case</button>
-                    </div>
-                </div>
-                
-                <div class="message visible">
-                    <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
-                    <div class="message-content bot-message">
-                        <p><strong>Hello! I'm Dr. Jingo.</strong></p>
-                        <p>Click 'Start New Case' to begin a clinical case study. I'll present a patient scenario, and you can respond with your differential diagnosis or next steps.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="input-container">
-                <div class="chat-input">
-                    <input type="text" id="question" placeholder="Respond to the case..." required>
-                    <button id="send-button"><i class="fas fa-paper-plane"></i></button>
-                </div>
-            </div>
-        </div>
+{% block content %}
+<div class="welcome-card">
+    <h2>Case Study Mode</h2>
+    <p>Practice clinical reasoning with interactive case studies tailored to Uganda's healthcare context.</p>
+    <div class="action-buttons">
+        <button id="start-case">Start New Case</button>
     </div>
+</div>
+<div class="message visible">
+    <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
+    <div class="message-content bot-message">
+        <p><strong>Hello! I'm Dr. Jingo.</strong></p>
+        <p>Click 'Start New Case' to begin a clinical case study. I'll present a patient scenario, and you can respond with your differential diagnosis or next steps.</p>
+    </div>
+</div>
+{% endblock %}
 
-    <script>
-        $(document).ready(function() {
-            const chatHistory = $("#chat-history");
-            const questionInput = $("#question");
-            const sendButton = $("#send-button");
-            let isProcessing = false;
-            
-            questionInput.focus();
+{% block input %}
+<div class="input-container">
+    <div class="chat-input">
+        <input type="text" id="question" placeholder="Respond to the case..." required>
+        <button id="send-button"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+<script>
+$(document).ready(function() {
+    const chatHistory = $("#content-body");
+    const questionInput = $("#question");
+    const sendButton = $("#send-button");
+    let isProcessing = false;
+    
+    questionInput.focus();
 
-            function scrollToBottom() {
-                const chatBody = chatHistory[0];
-                chatBody.scrollTop = chatBody.scrollHeight;
-            }
+    function scrollToBottom() {
+        const chatBody = chatHistory[0];
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
 
-            function disableInput() {
-                questionInput.prop('disabled', true);
-                sendButton.prop('disabled', true);
-                isProcessing = true;
-            }
+    function disableInput() {
+        questionInput.prop('disabled', true);
+        sendButton.prop('disabled', true);
+        isProcessing = true;
+    }
 
-            function enableInput() {
-                questionInput.prop('disabled', false);
-                sendButton.prop('disabled', false);
-                isProcessing = false;
-                questionInput.focus();
-            }
+    function enableInput() {
+        questionInput.prop('disabled', false);
+        sendButton.prop('disabled', false);
+        isProcessing = false;
+        questionInput.focus();
+    }
 
-            function appendUserMessage(message) {
-                const userMessageHtml = `
-                    <div class="message user-message-container">
-                        <div class="message-content user-message">${message}</div>
+    function appendUserMessage(message) {
+        const userMessageHtml = `
+            <div class="message user-message-container">
+                <div class="message-content user-message">${message}</div>
+            </div>
+        `;
+        chatHistory.append(userMessageHtml);
+        setTimeout(() => {
+            chatHistory.find('.message:last-child').addClass('visible');
+        }, 100);
+        saveLocalHistory('user', message);
+    }
+
+    function appendBotMessage(message) {
+        const botMessageHtml = `
+            <div class="message">
+                <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
+                <div class="message-content bot-message">${message}</div>
+            </div>
+        `;
+        chatHistory.append(botMessageHtml);
+        setTimeout(() => {
+            chatHistory.find('.message:last-child').addClass('visible');
+        }, 100);
+        saveLocalHistory('bot', message);
+    }
+
+    function createBotMessageContainer() {
+        const botMessageHtml = `
+            <div class="message">
+                <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
+                <div class="message-content bot-message">
+                    <div class="typing-indicator">
+                        <span></span><span></span><span></span>
                     </div>
-                `;
-                chatHistory.append(userMessageHtml);
-                setTimeout(() => {
-                    chatHistory.find('.message:last-child').addClass('visible');
-                }, 100);
-                saveLocalHistory('user', message);
-            }
+                </div>
+            </div>
+        `;
+        chatHistory.append(botMessageHtml);
+        setTimeout(() => {
+            chatHistory.find('.message:last-child').addClass('visible');
+        }, 100);
+        return chatHistory.find('.message:last-child .message-content');
+    }
 
-            function appendBotMessage(message) {
-                const botMessageHtml = `
-                    <div class="message">
-                        <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
-                        <div class="message-content bot-message">${message}</div>
-                    </div>
-                `;
-                chatHistory.append(botMessageHtml);
-                setTimeout(() => {
-                    chatHistory.find('.message:last-child').addClass('visible');
-                }, 100);
-                saveLocalHistory('bot', message);
-            }
+    async function processStream(response) {
+        const reader = response.body.getReader();
+        const messageContainer = createBotMessageContainer();
+        let messageText = '';
 
-            function createBotMessageContainer() {
-                const botMessageHtml = `
-                    <div class="message">
-                        <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
-                        <div class="message-content bot-message">
-                            <div class="typing-indicator">
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                chatHistory.append(botMessageHtml);
-                setTimeout(() => {
-                    chatHistory.find('.message:last-child').addClass('visible');
-                }, 100);
-                return chatHistory.find('.message:last-child .message-content');
-            }
-
-            async function processStream(response) {
-                const reader = response.body.getReader();
-                const messageContainer = createBotMessageContainer();
-                let messageText = '';
-
-                try {
-                    while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
-                        
-                        const chunk = new TextDecoder().decode(value);
-                        messageText += chunk;
-                        
-                        messageContainer.html(messageText);
-                        scrollToBottom();
-                    }
-                    saveLocalHistory('bot', messageText);
-                } catch (error) {
-                    console.error('Error reading stream:', error);
-                    messageContainer.html('An error occurred while processing your request.');
-                    saveLocalHistory('bot', 'An error occurred while processing your request.');
-                } finally {
-                    enableInput();
-                }
-            }
-
-            async function sendMessage() {
-                const userMessage = questionInput.val().trim();
-                if (userMessage === '' || isProcessing) return;
-
-                disableInput();
-                questionInput.val('');
-                appendUserMessage(userMessage);
+        try {
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                
+                const chunk = new TextDecoder().decode(value);
+                messageText += chunk;
+                
+                messageContainer.html(messageText);
                 scrollToBottom();
-
-                try {
-                    const response = await fetch('/send_chat', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ question: userMessage })
-                    });
-
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    await processStream(response);
-                } catch (error) {
-                    console.error('Error:', error);
-                    const messageContainer = createBotMessageContainer();
-                    messageContainer.html('An error occurred while processing your request.');
-                    saveLocalHistory('bot', 'An error occurred while processing your request.');
-                    enableInput();
-                }
             }
+            saveLocalHistory('bot', messageText);
+        } catch (error) {
+            console.error('Error reading stream:', error);
+            messageContainer.html('An error occurred while processing your request.');
+            saveLocalHistory('bot', 'An error occurred while processing your request.');
+        } finally {
+            enableInput();
+        }
+    }
 
-            $("#start-case").click(async () => {
-                if (isProcessing) return;
-                disableInput();
-                try {
-                    const response = await fetch('/start_case', { method: 'POST' });
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    await processStream(response);
-                } catch (error) {
-                    console.error('Error:', error);
-                    const messageContainer = createBotMessageContainer();
-                    messageContainer.html('Failed to start case study. Please try again.');
-                    saveLocalHistory('bot', 'Failed to start case study. Please try again.');
-                    enableInput();
-                }
+    async function sendMessage() {
+        const userMessage = questionInput.val().trim();
+        if (userMessage === '' || isProcessing) return;
+
+        disableInput();
+        questionInput.val('');
+        appendUserMessage(userMessage);
+        scrollToBottom();
+
+        try {
+            const response = await fetch('/send_chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ question: userMessage })
             });
 
-            sendButton.click(sendMessage);
-            questionInput.keypress(function(e) {
-                if (e.which === 13 && !isProcessing) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
+            if (!response.ok) throw new Error('Network response was not ok');
+            await processStream(response);
+        } catch (error) {
+            console.error('Error:', error);
+            const messageContainer = createBotMessageContainer();
+            messageContainer.html('An error occurred while processing your request.');
+            saveLocalHistory('bot', 'An error occurred while processing your request.');
+            enableInput();
+        }
+    }
 
-            const resizeObserver = new ResizeObserver(() => {
-                if (!isProcessing) {
-                    scrollToBottom();
-                }
-            });
-            
-            resizeObserver.observe(document.body);
+    $("#start-case").click(async () => {
+        if (isProcessing) return;
+        disableInput();
+        try {
+            const response = await fetch('/start_case', { method: 'POST' });
+            if (!response.ok) throw new Error('Network response was not ok');
+            await processStream(response);
+        } catch (error) {
+            console.error('Error:', error);
+            const messageContainer = createBotMessageContainer();
+            messageContainer.html('Failed to start case study. Please try again.');
+            saveLocalHistory('bot', 'Failed to start case study. Please try again.');
+            enableInput();
+        }
+    });
 
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/static/service-worker.js')
-                    .then(reg => console.log('Service Worker registered:', reg))
-                    .catch(err => console.error('Service Worker registration failed:', err));
-            }
+    sendButton.click(sendMessage);
+    questionInput.keypress(function(e) {
+        if (e.which === 13 && !isProcessing) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
 
-            function saveLocalHistory(type, text) {
-                const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-                history.push({ type, text });
-                if (history.length > 50) history.shift();
-                localStorage.setItem('chatHistory', JSON.stringify(history));
-            }
+    const resizeObserver = new ResizeObserver(() => {
+        if (!isProcessing) {
+            scrollToBottom();
+        }
+    });
+    
+    resizeObserver.observe(document.body);
 
-            setTimeout(scrollToBottom, 100);
-        });
-    </script>
-</body>
-</html>
+    function saveLocalHistory(type, text) {
+        const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+        history.push({ type, text });
+        if (history.length > 50) history.shift();
+        localStorage.setItem('chatHistory', JSON.stringify(history));
+    }
+
+    setTimeout(scrollToBottom, 100);
+});
+</script>
+{% endblock %}

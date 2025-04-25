@@ -1,6 +1,6 @@
 # routes/chat_routes.py
 from flask import Blueprint, request, jsonify, render_template, Response, session
-import google.generativeai as genai
+from routes.utils import genai, SYSTEM_PROMPT
 import time
 import logging
 

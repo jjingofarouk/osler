@@ -1,4 +1,3 @@
-<!-- templates/chat.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,27 +53,6 @@
             background-color: var(--surface-color);
             box-shadow: 0 0 20px var(--shadow-color);
             position: relative;
-        }
-
-        .logo-section {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: white;
-            padding: 1.5rem;
-            text-align: center;
-            border-bottom: 5px solid var(--accent-color);
-        }
-
-        .logo-section h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .logo-section p {
-            font-size: 1rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto;
         }
 
         .chat-container {
@@ -140,27 +118,6 @@
         .welcome-card p {
             color: var(--text-secondary);
             line-height: 1.6;
-        }
-
-        .features {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .feature {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--surface-color);
-            padding: 0.75rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        .feature i {
-            color: var(--accent-color);
         }
 
         .message {
@@ -275,7 +232,7 @@
         .chat-input input {
             flex: 1;
             padding: 0.85rem 1.25rem;
-            border: décrocher 2px solid var(--border-color);
+            border: 2px solid var(--border-color);
             border-radius: 30px;
             font-size: 1rem;
             background: var(--surface-color);
@@ -329,37 +286,23 @@
             box-shadow: none;
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            justify-content: center;
-        }
-
-        .action-buttons button {
-            background: var(--primary-color);
+        .nav-link {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
             color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            font-size: 1rem;
+            text-decoration: none;
         }
 
-        .action-buttons button:hover {
-            background: var(--primary-light);
+        .nav-link:hover {
+            text-decoration: underline;
         }
 
         @media (max-width: 768px) {
             .welcome-card {
                 padding: 1.25rem;
                 margin-bottom: 1.5rem;
-            }
-
-            .features {
-                flex-direction: column;
-                gap: 0.5rem;
             }
 
             .chat-header {
@@ -376,18 +319,6 @@
                 padding: 0.75rem 1rem;
                 padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0));
             }
-
-            .logo-section {
-                padding: 1rem;
-            }
-
-            .logo-section h1 {
-                font-size: 1.5rem;
-            }
-
-            .logo-section p {
-                font-size: 0.9rem;
-            }
         }
 
         @supports (-webkit-touch-callout: none) {
@@ -401,39 +332,22 @@
     <div class="app-container">
         <div class="chat-container">
             <div class="chat-header">
+                <a href="{{ url_for('home') }}" class="nav-link"><i class="fas fa-arrow-left"></i> Back</a>
                 <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" alt="Dr. Jingo">
-                Dr. Jingo
+                Dr. Jingo - Ask a Question
             </div>
             
             <div class="chat-body" id="chat-history">
                 <div class="welcome-card">
-                    <h2>Welcome to Dr. Jingo</h2>
-                    <p>Your trusted AI medical mentor designed to support medical education and clinical reasoning.</p>
-                    <div class="features">
-                        <div class="feature">
-                            <i class="fas fa-book-medical"></i>
-                            <span>Clinical Knowledge</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-user-md"></i>
-                            <span>Educational Support</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-clipboard-list"></i>
-                            <span>Evidence-Based</span>
-                        </div>
-                    </div>
-                    <div class="action-buttons">
-                        <button id="start-case">Start Case Study</button>
-                        <button id="clear-history">Clear History</button>
-                    </div>
+                    <h2>Ask Dr. Jingo</h2>
+                    <p>Ask any medical question and receive evidence-based answers tailored to Uganda's healthcare context.</p>
                 </div>
                 
                 <div class="message visible">
                     <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
                     <div class="message-content bot-message">
                         <p><strong>Hello! I'm Dr. Jingo.</strong></p>
-                        <p>Ask me any medical question, or start a case study to practice clinical reasoning. I can help with differential diagnoses, pathophysiology, and evidence-based approaches.</p>
+                        <p>Ask me any medical question, and I'll guide you with clinical insights and evidence-based approaches.</p>
                     </div>
                 </div>
             </div>
@@ -484,6 +398,7 @@
                 setTimeout(() => {
                     chatHistory.find('.message:last-child').addClass('visible');
                 }, 100);
+                saveLocalHistory('user', message);
             }
 
             function appendBotMessage(message) {
@@ -497,6 +412,7 @@
                 setTimeout(() => {
                     chatHistory.find('.message:last-child').addClass('visible');
                 }, 100);
+                saveLocalHistory('bot', message);
             }
 
             function createBotMessageContainer() {
@@ -533,9 +449,11 @@
                         messageContainer.html(messageText);
                         scrollToBottom();
                     }
+                    saveLocalHistory('bot', messageText);
                 } catch (error) {
                     console.error('Error reading stream:', error);
                     messageContainer.html('An error occurred while processing your request.');
+                    saveLocalHistory('bot', 'An error occurred while processing your request.');
                 } finally {
                     enableInput();
                 }
@@ -565,44 +483,10 @@
                     console.error('Error:', error);
                     const messageContainer = createBotMessageContainer();
                     messageContainer.html('An error occurred while processing your request.');
+                    saveLocalHistory('bot', 'An error occurred while processing your request.');
                     enableInput();
                 }
             }
-
-            $("#start-case").click(async () => {
-                if (isProcessing) return;
-                disableInput();
-                try {
-                    const response = await fetch('/start_case', { method: 'POST' });
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    await processStream(response);
-                } catch (error) {
-                    console.error('Error:', error);
-                    const messageContainer = createBotMessageContainer();
-                    messageContainer.html('Failed to start case study. Please try again.');
-                    enableInput();
-                }
-            });
-
-            $("#clear-history").click(async () => {
-                if (isProcessing) return;
-                disableInput();
-                try {
-                    const response = await fetch('/clear_history', { method: 'POST' });
-                    const data = await response.json();
-                    if (response.ok) {
-                        chatHistory.find('.message').remove();
-                        appendBotMessage('Chat history cleared. Ask a new question or start a case study.');
-                    } else {
-                        throw new Error(data.error);
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    appendBotMessage('Failed to clear history. Please try again.');
-                } finally {
-                    enableInput();
-                }
-            });
 
             sendButton.click(sendMessage);
             questionInput.keypress(function(e) {
@@ -625,26 +509,15 @@
                     .then(reg => console.log('Service Worker registered:', reg))
                     .catch(err => console.error('Service Worker registration failed:', err));
             }
-            
-            setTimeout(scrollToBottom, 100);
-
-            // Load chat history from localStorage
-            function loadLocalHistory() {
-                const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-                history.forEach(msg => {
-                    if (msg.type === 'user') appendUserMessage(msg.text);
-                    else appendBotMessage(msg.text);
-                });
-            }
 
             function saveLocalHistory(type, text) {
                 const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
                 history.push({ type, text });
-                if (history.length > 50) history.shift(); // Limit to 50 messages
+                if (history.length > 50) history.shift();
                 localStorage.setItem('chatHistory', JSON.stringify(history));
             }
 
-            loadLocalHistory();
+            setTimeout(scrollToBottom, 100);
         });
     </script>
 </body>

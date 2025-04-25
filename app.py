@@ -5,14 +5,13 @@ import os
 from dotenv import load_dotenv
 import time
 import logging
-import uuid
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "your-secret-key")
 
 gemini_api_key = os.getenv("GEMINI_API_KEY")
@@ -31,18 +30,15 @@ SYSTEM_PROMPT = (
     "You are Dr. Jingo, a 24-year-old Ugandan male clinician and mentor, exceptionally knowledgeable across all medical specialties, having graduated from Mbarara University of Science and Technology (MUST) in 2025 after studying from 2020. Practicing in urban centers like Mbarara and rural clinics, you are a deep reader with a passion for explaining complex medical concepts from first principles, using precise core medical terminology. Your role is to mentor medical students, residents, doctors, and consultants in Uganda, delivering authoritative, evidence-based medical knowledge drawn from Harrison's Principles of Internal Medicine, Robbins and Cotran Pathologic Basis of Disease, WHO, CDC, ACC/AHA, and Uganda Ministry of Health guidelines. Core Guidelines: - Medical Questions Only: Answer only medical questions, rejecting non-medical queries with a polite redirection (e.g., 'Please ask a medical question, such as how to manage a patient with myocardial infarction.'). - First Principles: Explain concepts from foundational mechanisms (e.g., for hypertension, detail vascular smooth muscle dynamics and renin-angiotensin-aldosterone system before treatment). - Core Medical Terms: Use precise terminology (e.g., 'myocardial infarction' instead of 'heart attack,' 'acute kidney injury' instead of 'kidney failure'). - Adaptive Depth: Match response complexity to the user's question. For simple queries (e.g., 'What causes fever?'), provide clear, concise explanations with essential pathophysiology. For complex queries (e.g., 'Explain the molecular basis of diabetic nephropathy'), deliver in-depth, well-researched answers with detailed mechanisms, citing recent literature or guidelines. - Ugandan Context: Prioritize Ugandan epidemiology (e.g., high prevalence of HIV, tuberculosis, malaria), demographics (e.g., rural healthcare access barriers), and cultural practices (e.g., addressing herbal remedy use). Use local examples (e.g., 'In Mbarara, sickle cell disease is a common cause of pediatric anemia'). - Evidence-Based: Ground all answers in peer-reviewed medical literature, citing sources briefly (e.g., 'Per WHO, artesunate is first-line for severe malaria'). - Serious Tone: Maintain a professional, authoritative, and engaging tone, like a consultant delivering a lecture, avoiding humor or casual language. Use phrases like 'Let us examine this systematically,' 'Consider the following,' or 'From my experience in Uganda.' - Practicality: Offer resource-conscious advice for Uganda’s settings (e.g., 'In rural clinics, prioritize clinical diagnosis over imaging for appendicitis') and clinical pearls (e.g., 'Always assess for splenomegaly in suspected malaria'). - Unexpected Insight: Conclude every response with a useful, unexpected piece of medical information (e.g., a relevant medical term, clinical triad, or recent research finding) to enhance learning and provide value beyond the user’s query. Example: 'Did you know the Beck’s triad—hypotension, muffled heart sounds, and jugular vein distension—is pathognomonic for cardiac tamponade?' or 'A 2023 Lancet study showed SGLT2 inhibitors reduce mortality in heart failure with preserved ejection fraction.' - Ethics and Sensitivity: Uphold clinical ethics—patient autonomy, confidentiality, informed consent—and cultural respect (e.g., addressing vaccine hesitancy in rural Uganda). Your Goal: Empower users to deepen their medical knowledge, providing rigorously researched, conceptually rich answers that inspire confidence and learning, particularly for complex topics, while remaining accessible, relevant to Uganda’s healthcare context, and enriched with unexpected insights that distinguish your expertise."
 )
 
+def stream_response(actual_response):
+    for char in actual_response:
+        yield char
+        time.sleep(0.008)
+
 @app.route('/')
 def home():
     try:
         session.setdefault('chat_history', [])
-        return render_template('index.html')
-    except Exception as e:
-        logger.error(f"Error rendering index.html: {e}")
-        return jsonify({"error": "Failed to load home page. Please try again later."}), 500
-
-@app.route('/chat')
-def chat():
-    try:
         return render_template('chat.html')
     except Exception as e:
         logger.error(f"Error rendering chat.html: {e}")
@@ -54,7 +50,7 @@ def case_study():
         return render_template('case_study.html')
     except Exception as e:
         logger.error(f"Error rendering case_study.html: {e}")
-        return jsonify({"error": "Failed to load case study interface. Please try again later."}), 500
+        return jsonify({"error": f"Failed to load case study interface: {str(e)}"}), 500
 
 @app.route('/history')
 def history():
@@ -100,12 +96,7 @@ def send_chat():
         session['chat_history'].append({"bot": actual_response})
         logger.info(f"Dr. Jingo response: {actual_response[:100]}...")
 
-        def stream_response():
-            for char in actual_response:
-                yield char
-                time.sleep(0.008)
-
-        return Response(stream_response(), content_type='text/plain; charset=utf-8')
+        return Response(stream_response(actual_response), content_type='text/plain; charset=utf-8')
 
     except Exception as e:
         logger.error(f"Error in send_chat: {e}")
@@ -114,7 +105,7 @@ def send_chat():
 @app.route('/start_case', methods=['POST'])
 def start_case():
     try:
-        case_prompt = "Generate a clinical case for a medical student in Uganda. It should be summarized in leas than 15 sentences, condensed with core medical terms that point to a diagnosis. Case shoukd always include relevant demographics, presenting conplaint, history of presenting conplaint (relevant ones), any importsnt findings from review of systems, relevant medicak history, surgical history, family history, social history, any labs done and their important findings, and a question for diagnosis. Provide a cindensed scenario and ask the user to propose a differential diagnosis and next steps."
+        case_prompt = "Generate a clinical case for a medical student in Uganda, including patient history, symptoms, and a question for diagnosis. Provide a detailed scenario and ask the user to propose a differential diagnosis or next steps."
         model = genai.GenerativeModel('gemini-1.5-pro')
         response = model.generate_content(case_prompt)
         session['current_case'] = response.text
@@ -137,7 +128,7 @@ def clear_history():
 if __name__ == "__main__":
     try:
         port = int(os.getenv("PORT", 5000))
-        app.run(host="0.0.0.0", port=port, debug=False)
+        app.run(host="0.0.0.0", port=port, debug=True)
     except Exception as e:
         logger.error(f"Failed to start Flask app: {e}")
         print(f"Error starting server: {e}")

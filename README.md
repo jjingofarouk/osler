@@ -97,14 +97,14 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact 📧
 
-Email - AskOsler.coop@gmail.com  
+Email - jjingofaroukk@gmail.com  
 Project Link: [https://github.com/jjingofarouk/osler](https://github.com/AskOsler1/chatbot)
 
 ---
 
 ## Acknowledgements 🎉
 
-- **Jjingo Farouk**: Lead Developer and Creator of Professor Osler Chatbot.
+- **Jjingo Farouk**: Lead Developer.
 - [Flask](https://flask.palletsprojects.com/): For the web framework.
 - [Google Generative AI](https://ai.google/): For powering the AI model.
 - [Bootstrap](https://getbootstrap.com/): For the responsive design.
@@ -112,4 +112,4 @@ Project Link: [https://github.com/jjingofarouk/osler](https://github.com/AskOsle
 
 ---
 
-**Professor Osler Chatbot** is here to revolutionize medical education. Let’s make learning medicine engaging, interactive, and accessible to all! 🚀
+**Professor Osler Chatbot** is here to revolutionize medical education. Let’s make learning medicine engaging, interactive, and accessible to all! 

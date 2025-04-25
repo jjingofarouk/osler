@@ -1,3 +1,4 @@
+<!-- templates/chat.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -274,7 +275,7 @@
         .chat-input input {
             flex: 1;
             padding: 0.85rem 1.25rem;
-            border: 2px solid var(--border-color);
+            border: décrocher 2px solid var(--border-color);
             border-radius: 30px;
             font-size: 1rem;
             background: var(--surface-color);
@@ -328,7 +329,28 @@
             box-shadow: none;
         }
 
-        /* Fix mobile issues */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+
+        .action-buttons button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-buttons button:hover {
+            background: var(--primary-light);
+        }
+
         @media (max-width: 768px) {
             .welcome-card {
                 padding: 1.25rem;
@@ -368,7 +390,6 @@
             }
         }
 
-        /* Fix for iOS */
         @supports (-webkit-touch-callout: none) {
             .chat-body {
                 padding-bottom: 70px;
@@ -378,8 +399,6 @@
 </head>
 <body>
     <div class="app-container">
-
-        
         <div class="chat-container">
             <div class="chat-header">
                 <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" alt="Dr. Jingo">
@@ -404,13 +423,17 @@
                             <span>Evidence-Based</span>
                         </div>
                     </div>
+                    <div class="action-buttons">
+                        <button id="start-case">Start Case Study</button>
+                        <button id="clear-history">Clear History</button>
+                    </div>
                 </div>
                 
                 <div class="message visible">
                     <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
                     <div class="message-content bot-message">
                         <p><strong>Hello! I'm Dr. Jingo.</strong></p>
-                        <p>Ask me any medical question, and I'll guide you through a clinical lens with practical insights. I can help with clinical reasoning, differential diagnoses, and evidence-based approaches.</p>
+                        <p>Ask me any medical question, or start a case study to practice clinical reasoning. I can help with differential diagnoses, pathophysiology, and evidence-based approaches.</p>
                     </div>
                 </div>
             </div>
@@ -431,7 +454,6 @@
             const sendButton = $("#send-button");
             let isProcessing = false;
             
-            // Focus on input when page loads
             questionInput.focus();
 
             function scrollToBottom() {
@@ -459,6 +481,19 @@
                     </div>
                 `;
                 chatHistory.append(userMessageHtml);
+                setTimeout(() => {
+                    chatHistory.find('.message:last-child').addClass('visible');
+                }, 100);
+            }
+
+            function appendBotMessage(message) {
+                const botMessageHtml = `
+                    <div class="message">
+                        <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
+                        <div class="message-content bot-message">${message}</div>
+                    </div>
+                `;
+                chatHistory.append(botMessageHtml);
                 setTimeout(() => {
                     chatHistory.find('.message:last-child').addClass('visible');
                 }, 100);
@@ -495,7 +530,6 @@
                         const chunk = new TextDecoder().decode(value);
                         messageText += chunk;
                         
-                        // Replace typing indicator with actual text
                         messageContainer.html(messageText);
                         scrollToBottom();
                     }
@@ -535,6 +569,41 @@
                 }
             }
 
+            $("#start-case").click(async () => {
+                if (isProcessing) return;
+                disableInput();
+                try {
+                    const response = await fetch('/start_case', { method: 'POST' });
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    await processStream(response);
+                } catch (error) {
+                    console.error('Error:', error);
+                    const messageContainer = createBotMessageContainer();
+                    messageContainer.html('Failed to start case study. Please try again.');
+                    enableInput();
+                }
+            });
+
+            $("#clear-history").click(async () => {
+                if (isProcessing) return;
+                disableInput();
+                try {
+                    const response = await fetch('/clear_history', { method: 'POST' });
+                    const data = await response.json();
+                    if (response.ok) {
+                        chatHistory.find('.message').remove();
+                        appendBotMessage('Chat history cleared. Ask a new question or start a case study.');
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    appendBotMessage('Failed to clear history. Please try again.');
+                } finally {
+                    enableInput();
+                }
+            });
+
             sendButton.click(sendMessage);
             questionInput.keypress(function(e) {
                 if (e.which === 13 && !isProcessing) {
@@ -543,7 +612,6 @@
                 }
             });
 
-            // Handle viewport resizing to keep scroll at bottom
             const resizeObserver = new ResizeObserver(() => {
                 if (!isProcessing) {
                     scrollToBottom();
@@ -552,15 +620,31 @@
             
             resizeObserver.observe(document.body);
 
-            // Register service worker for PWA
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/static/service-worker.js')
                     .then(reg => console.log('Service Worker registered:', reg))
                     .catch(err => console.error('Service Worker registration failed:', err));
             }
             
-            // Make sure we scroll to bottom initially
             setTimeout(scrollToBottom, 100);
+
+            // Load chat history from localStorage
+            function loadLocalHistory() {
+                const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+                history.forEach(msg => {
+                    if (msg.type === 'user') appendUserMessage(msg.text);
+                    else appendBotMessage(msg.text);
+                });
+            }
+
+            function saveLocalHistory(type, text) {
+                const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+                history.push({ type, text });
+                if (history.length > 50) history.shift(); // Limit to 50 messages
+                localStorage.setItem('chatHistory', JSON.stringify(history));
+            }
+
+            loadLocalHistory();
         });
     </script>
 </body>

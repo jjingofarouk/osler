@@ -1,7 +1,8 @@
+
 from flask import Flask
 from routes.chat_routes import chat_bp
 from routes.case_study_routes import case_study_bp
-from routes.history_routes import history_routes
+from routes.history_routes import history_bp  # Corrected import
 import os
 from dotenv import load_dotenv
 import logging
@@ -17,7 +18,7 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "your-secret-key")
 # Register blueprints
 app.register_blueprint(chat_bp)
 app.register_blueprint(case_study_bp)
-app.register_blueprint(history_bp)
+app.register_blueprint(history_bp)  # Corrected blueprint name
 
 if __name__ == "__main__":
     try:

@@ -10,6 +10,7 @@ case_study_bp = Blueprint('case_study', __name__)
 @case_study_bp.route('/case_study')
 def case_study():
     try:
+        session.setdefault('chat_history', [])  # Initialize chat_history if not set
         return render_template('case_study.html')
     except Exception as e:
         logger.error(f"Error rendering case_study.html: {e}")

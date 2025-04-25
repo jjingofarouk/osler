@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 import time
 import logging
+import uuid
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "your-secret-key")  # Required for sessions
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "your-secret-key")
 
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 if gemini_api_key:
@@ -34,10 +35,34 @@ SYSTEM_PROMPT = (
 def home():
     try:
         session.setdefault('chat_history', [])
+        return render_template('index.html')
+    except Exception as e:
+        logger.error(f"Error rendering index.html: {e}")
+        return jsonify({"error": "Failed to load home page. Please try again later."}), 500
+
+@app.route('/chat')
+def chat():
+    try:
         return render_template('chat.html')
     except Exception as e:
         logger.error(f"Error rendering chat.html: {e}")
         return jsonify({"error": "Failed to load chat interface. Please try again later."}), 500
+
+@app.route('/case_study')
+def case_study():
+    try:
+        return render_template('case_study.html')
+    except Exception as e:
+        logger.error(f"Error rendering case_study.html: {e}")
+        return jsonify({"error": "Failed to load case study interface. Please try again later."}), 500
+
+@app.route('/history')
+def history():
+    try:
+        return render_template('history.html')
+    except Exception as e:
+        logger.error(f"Error rendering history.html: {e}")
+        return jsonify({"error": "Failed to load history interface. Please try again later."}), 500
 
 @app.route('/send_chat', methods=['POST'])
 def send_chat():
@@ -60,7 +85,7 @@ def send_chat():
             return jsonify({"error": "Clinical resources unavailable. Please check the API configuration."}), 500
 
         session['chat_history'].append({"user": user_message})
-        history = session['chat_history'][-5:]  # Keep last 5 messages for context
+        history = session['chat_history'][-5:]
         content = SYSTEM_PROMPT + " Previous conversation: " + str(history) + " Current question: " + user_message
 
         model = genai.GenerativeModel('gemini-1.5-pro')
@@ -89,7 +114,7 @@ def send_chat():
 @app.route('/start_case', methods=['POST'])
 def start_case():
     try:
-        case_prompt = "Generate a clinical case for a medical student in Uganda, including patient history, symptoms, and a question for diagnosis. Provide a detailed scenario and ask the user to propose a differential diagnosis or next steps."
+        case_prompt = "Generate a clinical case for a medical student in Uganda. It should be summarized in leas than 15 sentences, condensed with core medical terms that point to a diagnosis. Case shoukd always include relevant demographics, presenting conplaint, history of presenting conplaint (relevant ones), any importsnt findings from review of systems, relevant medicak history, surgical history, family history, social history, any labs done and their important findings, and a question for diagnosis. Provide a cindensed scenario and ask the user to propose a differential diagnosis and next steps."
         model = genai.GenerativeModel('gemini-1.5-pro')
         response = model.generate_content(case_prompt)
         session['current_case'] = response.text

@@ -1,361 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Dr. Jingo Chat History</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#006d77">
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <link rel="icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    
-    <style>
-        :root {
-            --primary-color: #006d77;
-            --primary-light: #83c5be;
-            --secondary-color: #e9c46a;
-            --accent-color: #f4a261;
-            --background-color: #faf3e0;
-            --surface-color: #edf6f9;
-            --text-primary: #2a3439;
-            --text-secondary: #506770;
-            --border-color: #d2d6d7;
-            --user-message-bg: #006d77;
-            --user-text-color: #ffffff;
-            --bot-message-bg: #ffffff;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-        }
+<!-- templates/history.html -->
+{% extends "base.html" %}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+{% block title %}Chat History{% endblock %}
 
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            background-color: var(--background-color);
-            font-family: 'Poppins', sans-serif;
-            color: var(--text-primary);
-        }
-
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: var(--surface-color);
-            box-shadow: 0 0 20px var(--shadow-color);
-            position: relative;
-        }
-
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .chat-header {
-            background: var(--primary-color);
-            color: white;
-            padding: 0.85rem 1.25rem;
-            font-size: 1.25rem;
-            font-weight: 500;
-            border-bottom: 1px solid var(--primary-light);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex: 0 0 auto;
-            z-index: 10;
-        }
-
-        .chat-header img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 2px 5px var(--shadow-color);
-        }
-
-        .chat-body {
-            flex: 1 1 auto;
-            overflow-y: auto;
-            padding: 1.5rem;
-            background: var(--background-color);
-            background-image: linear-gradient(rgba(0, 109, 119, 0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 109, 119, 0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
-            position: relative;
-        }
-
-        .welcome-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 5px 15px var(--shadow-color);
-            border-left: 5px solid var(--primary-color);
-            max-width: 90%;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .welcome-card h2 {
-            color: var(--primary-color);
-            font-size: 1.4rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .welcome-card p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            justify-content: center;
-        }
-
-        .action-buttons button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .action-buttons button:hover {
-            background: var(--primary-light);
-        }
-
-        .message {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 1.25rem;
-            animation: fadeIn 0.3s ease-in-out;
-            opacity: 0;
-        }
-
-        .message.visible {
-            opacity: 1;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message .avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            margin-right: 0.85rem;
-            flex-shrink: 0;
-            box-shadow: 0 2px 5px var(--shadow-color);
-        }
-
-        .message .message-content {
-            max-width: 80%;
-            padding: 1rem 1.25rem;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-            box-shadow: 0 2px 5px var(--shadow-color);
-        }
-
-        .message .message-content p {
-            margin-bottom: 0.75rem;
-        }
-
-        .message .message-content p:last-child {
-            margin-bottom: 0;
-        }
-
-        .bot-message {
-            background: var(--bot-message-bg);
-            border-top-left-radius: 4px;
-            color: var(--text-primary);
-        }
-
-        .user-message-container {
-            justify-content: flex-end;
-            margin-right: 0.5rem;
-            display: flex;
-        }
-
-        .user-message {
-            background: var(--user-message-bg);
-            border-top-right-radius: 4px;
-            color: var(--user-text-color);
-        }
-
-        .nav-link {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            color: white;
-            font-size: 1rem;
-            text-decoration: none;
-        }
-
-        .nav-link:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .welcome-card {
-                padding: 1.25rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .chat-header {
-                padding: 0.75rem 1rem;
-            }
-
-            .message .message-content {
-                max-width: 85%;
-                padding: 0.75rem 1rem;
-                font-size: 0.9rem;
-            }
-        }
-
-        @supports (-webkit-touch-callout: none) {
-            .chat-body {
-                padding-bottom: 70px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="app-container">
-        <div class="chat-container">
-            <div class="chat-header">
-                <a href="{{ url_for('home') }}" class="nav-link"><i class="fas fa-arrow-left"></i> Back</a>
-                <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" alt="Dr. Jingo">
-                Dr. Jingo - Chat History
-            </div>
-            
-            <div class="chat-body" id="chat-history">
-                <div class="welcome-card">
-                    <h2>Chat History</h2>
-                    <p>Review your previous conversations with Dr. Jingo.</p>
-                    <div class="action-buttons">
-                        <button id="clear-history">Clear History</button>
-                    </div>
-                </div>
-                
-                <div class="message visible">
-                    <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
-                    <div class="message-content bot-message">
-                        <p><strong>Hello! I'm Dr. Jingo.</strong></p>
-                        <p>Your past questions and my responses are displayed below. Use the 'Clear History' button to start fresh.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+{% block content %}
+<div class="welcome-card">
+    <h2>Chat History</h2>
+    <p>Review your previous conversations with Dr. Jingo.</p>
+    <div class="action-buttons">
+        <button id="clear-history">Clear History</button>
     </div>
+</div>
+<div class="message visible">
+    <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
+    <div class="message-content bot-message">
+        <p><strong>Hello! I'm Dr. Jingo.</strong></p>
+        <p>Your past questions and my responses are displayed below. Use the 'Clear History' button to start fresh.</p>
+    </div>
+</div>
+<script>
+$(document).ready(function() {
+    const chatHistory = $("#content-body");
+    let isProcessing = false;
 
-    <script>
-        $(document).ready(function() {
-            const chatHistory = $("#chat-history");
-            let isProcessing = false;
+    function scrollToBottom() {
+        const chatBody = chatHistory[0];
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
 
-            function scrollToBottom() {
-                const chatBody = chatHistory[0];
-                chatBody.scrollTop = chatBody.scrollHeight;
-            }
+    function appendUserMessage(message) {
+        const userMessageHtml = `
+            <div class="message user-message-container">
+                <div class="message-content user-message">${message}</div>
+            </div>
+        `;
+        chatHistory.append(userMessageHtml);
+        setTimeout(() => {
+            chatHistory.find('.message:last-child').addClass('visible');
+        }, 100);
+    }
 
-            function appendUserMessage(message) {
-                const userMessageHtml = `
-                    <div class="message user-message-container">
-                        <div class="message-content user-message">${message}</div>
-                    </div>
-                `;
-                chatHistory.append(userMessageHtml);
-                setTimeout(() => {
-                    chatHistory.find('.message:last-child').addClass('visible');
-                }, 100);
-            }
+    function appendBotMessage(message) {
+        const botMessageHtml = `
+            <div class="message">
+                <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
+                <div class="message-content bot-message">${message}</div>
+            </div>
+        `;
+        chatHistory.append(botMessageHtml);
+        setTimeout(() => {
+            chatHistory.find('.message:last-child').addClass('visible');
+        }, 100);
+    }
 
-            function appendBotMessage(message) {
-                const botMessageHtml = `
-                    <div class="message">
-                        <img src="{{ url_for('static', filename='assets/img/bothead.png') }}" class="avatar" alt="Dr. Jingo">
-                        <div class="message-content bot-message">${message}</div>
-                    </div>
-                `;
-                chatHistory.append(botMessageHtml);
-                setTimeout(() => {
-                    chatHistory.find('.message:last-child').addClass('visible');
-                }, 100);
-            }
-
-            function loadLocalHistory() {
-                const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-                if (history.length === 0) {
-                    appendBotMessage("No chat history available. Start a new conversation!");
-                } else {
-                    history.forEach(msg => {
-                        if (msg.type === 'user') appendUserMessage(msg.text);
-                        else appendBotMessage(msg.text);
-                    });
-                }
-            }
-
-            $("#clear-history").click(async () => {
-                if (isProcessing) return;
-                isProcessing = true;
-                try {
-                    const response = await fetch('/clear_history', { method: 'POST' });
-                    const data = await response.json();
-                    if (response.ok) {
-                        localStorage.removeItem('chatHistory');
-                        chatHistory.find('.message').remove();
-                        appendBotMessage('Chat history cleared. Start a new conversation!');
-                    } else {
-                        throw new Error(data.error);
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    appendBotMessage('Failed to clear history. Please try again.');
-                } finally {
-                    isProcessing = false;
-                }
+    function loadLocalHistory() {
+        const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+        if (history.length === 0) {
+            appendBotMessage("No chat history available. Start a new conversation!");
+        } else {
+            history.forEach(msg => {
+                if (msg.type === 'user') appendUserMessage(msg.text);
+                else appendBotMessage(msg.text);
             });
+        }
+    }
 
-            const resizeObserver = new ResizeObserver(() => {
-                if (!isProcessing) {
-                    scrollToBottom();
-                }
-            });
-            
-            resizeObserver.observe(document.body);
-
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/static/service-worker.js')
-                    .then(reg => console.log('Service Worker registered:', reg))
-                    .catch(err => console.error('Service Worker registration failed:', err));
+    $("#clear-history").click(async () => {
+        if (isProcessing) return;
+        isProcessing = true;
+        try {
+            const response = await fetch('/clear_history', { method: 'POST' });
+            const data = await response.json();
+            if (response.ok) {
+                localStorage.removeItem('chatHistory');
+                chatHistory.find('.message').remove();
+                appendBotMessage('Chat history cleared. Start a new conversation!');
+            } else {
+                throw new Error(data.error);
             }
+        } catch (error) {
+            console.error('Error:', error);
+            appendBotMessage('Failed to clear history. Please try again.');
+        } finally {
+            isProcessing = false;
+        }
+    });
 
-            loadLocalHistory();
-            setTimeout(scrollToBottom, 100);
-        });
-    </script>
-</body>
-</html>
+    const resizeObserver = new ResizeObserver(() => {
+        if (!isProcessing) {
+            scrollToBottom();
+        }
+    });
+    
+    resizeObserver.observe(document.body);
+
+    loadLocalHistory();
+    setTimeout(scrollToBottom, 100);
+});
+</script>
+{% endblock %}
